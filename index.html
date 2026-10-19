@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GetHigh indir</title>
+<meta name="description" content="GetHigh uygulamasını ZIP olarak indir, ayıkla ve exe dosyasını çalıştır.">
+<meta name="theme-color" content="#06040d">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+  :root {
+    --bg: #06040d;
+    --text: #f5f1ff;
+    --muted: rgba(245, 241, 255, 0.68);
+    --faint: rgba(245, 241, 255, 0.42);
+    --magenta: #d946ef;
+    --violet: #7c3aed;
+    --lavender: #c9a7ff;
+    --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --glass-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.4),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 32px rgba(255, 255, 255, 0.05),
+      0 24px 60px -20px rgba(0, 0, 0, 0.65);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    position: relative;
+    z-index: 0;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--lavender); outline-offset: 4px; border-radius: 8px; }
+  .wrap { width: min(1080px, 100% - 40px); margin-inline: auto; }
+
+  /* Film greni: camın arkasına doku verir */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Akan ışık topları: cam bunların üzerinden kırılır */
+  .bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55; will-change: transform; }
+  .orb.a { width: 520px; height: 520px; left: -160px; top: 22%; background: #7c3aed; animation: drift-a 22s ease-in-out infinite alternate; }
+  .orb.b { width: 460px; height: 460px; right: -140px; top: 40%; background: #c026d3; animation: drift-b 26s ease-in-out infinite alternate; }
+  .orb.c { width: 560px; height: 560px; left: 18%; top: 66%; background: #5b21b6; animation: drift-a 30s ease-in-out infinite alternate-reverse; }
+  .orb.d { width: 420px; height: 420px; right: 8%; top: 86%; background: #d946ef; opacity: 0.4; animation: drift-b 24s ease-in-out infinite alternate-reverse; }
+  @keyframes drift-a { from { transform: translate(0, 0) scale(1); } to { transform: translate(140px, -90px) scale(1.18); } }
+  @keyframes drift-b { from { transform: translate(0, 0) scale(1.1); } to { transform: translate(-130px, 110px) scale(0.92); } }
+
+  /* ---------- Liquid glass ---------- */
+  .glass {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 42%, rgba(255, 255, 255, 0.11) 100%);
+    -webkit-backdrop-filter: blur(16px) saturate(190%);
+            backdrop-filter: blur(16px) saturate(190%);
+    box-shadow: var(--glass-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  /* Chromium'da camın arkası hafifçe sıvı gibi kırılır */
+  .liquid-svg .glass {
+    -webkit-backdrop-filter: url(#liquid) blur(10px) saturate(190%);
+            backdrop-filter: url(#liquid) blur(10px) saturate(190%);
+  }
+  /* Kenardaki parlak çerçeve */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 32%, rgba(255, 255, 255, 0) 68%, rgba(255, 255, 255, 0.4));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+  /* İmleci izleyen ışık */
+  .glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(260px circle at var(--mx, 18%) var(--my, 0%), rgba(255, 255, 255, 0.22), transparent 62%);
+    opacity: 0.55;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .glass:hover::after { opacity: 1; }
+
+  /* ---------- Üst bar ---------- */
+  .nav {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    z-index: 40;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: min(880px, 100% - 28px);
+    padding: 9px 10px 9px 18px;
+    border-radius: 999px;
+    animation: drop 0.9s var(--ease) both;
+  }
+  @keyframes drop { from { opacity: 0; transform: translate(-50%, -24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .brand { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 19px; text-decoration: none; }
+  .brand img { width: 34px; height: 34px; display: block; }
+  .nav-links { position: relative; z-index: 1; display: flex; align-items: center; gap: 30px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.15s ease; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.download { color: #fff; }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; isolation: isolate; text-align: center; padding-bottom: 130px; }
+  .aurora {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 780px;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(50% 55% at 62% 0%, rgba(217, 70, 239, 0.95) 0%, rgba(217, 70, 239, 0) 70%),
+      radial-gradient(60% 65% at 38% 0%, rgba(124, 58, 237, 0.95) 0%, rgba(124, 58, 237, 0) 72%),
+      radial-gradient(40% 40% at 50% 62%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 70%);
+    animation: aurora 12s ease-in-out infinite alternate;
+  }
+  .aurora::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 7px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 62%);
+            mask-image: linear-gradient(to bottom, #000 0%, transparent 62%);
+  }
+  @keyframes aurora { from { transform: translateX(-4%) scale(1); } to { transform: translateX(4%) scale(1.08); } }
+
+  .logo-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 230px;
+    height: 230px;
+    margin: 112px auto 30px;
+    transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.25s ease-out;
+  }
+  .logo-stage::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, rgba(217, 70, 239, 0), rgba(217, 70, 239, 0.8), rgba(124, 58, 237, 0) 38%, rgba(124, 58, 237, 0.8) 68%, rgba(217, 70, 239, 0));
+    filter: blur(36px);
+    opacity: 0.7;
+    animation: spin 14s linear infinite;
+  }
+  .ring {
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    opacity: 0;
+    animation: ripple 5s ease-out infinite;
+  }
+  .ring.two { animation-delay: 2.5s; }
+  @keyframes ripple { 0% { transform: scale(0.78); opacity: 0.5; } 100% { transform: scale(1.75); opacity: 0; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hero-logo {
+    position: relative;
+    display: block;
+    width: 210px;
+    height: auto;
+    filter: drop-shadow(0 0 46px rgba(217, 70, 239, 0.55)) drop-shadow(0 18px 40px rgba(10, 0, 40, 0.6));
+    animation: arrive 1.1s var(--ease) both, float 6s ease-in-out 1.1s infinite alternate;
+  }
+  @keyframes arrive { from { opacity: 0; transform: translateY(18px) scale(0.9) rotate(-6deg); } to { opacity: 1; transform: none; } }
+  @keyframes float { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+
+  .enter { animation: rise 0.9s var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 250ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+  h1 { margin: 0 0 20px; font-family: var(--display); font-weight: 700; font-size: clamp(46px, 8vw, 88px); line-height: 1.02; letter-spacing: -0.02em; }
+  .grad {
+    background: linear-gradient(100deg, #f0abfc 0%, #c026d3 30%, #7c3aed 55%, #c026d3 80%, #f0abfc 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+            color: transparent;
+    animation: sheen 7s linear infinite;
+  }
+  @keyframes sheen { to { background-position: -220% 0; } }
+  .lead { margin: 0 auto 28px; max-width: 46ch; color: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 0 44px; padding: 0; list-style: none; font-size: 15px; }
+  .chips li { display: flex; align-items: center; gap: 10px; padding: 9px 18px 9px 11px; border-radius: 999px; }
+  .chips svg { position: relative; z-index: 1; flex: none; width: 22px; height: 22px; }
+  .chips span { position: relative; z-index: 1; }
+
+  .download {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 40px 17px 34px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(244, 143, 252, 0.95) 0%, rgba(162, 28, 175, 0.95) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -12px 22px rgba(60, 0, 80, 0.22),
+      0 0 0 1px rgba(255, 255, 255, 0.16),
+      0 14px 46px rgba(217, 70, 239, 0.55);
+    color: #fff;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 19px;
+    text-decoration: none;
+    transition: transform 0.2s var(--ease), filter 0.2s ease, box-shadow 0.2s ease;
+    animation: glow 3.2s ease-in-out infinite;
+  }
+  .download::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -70%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    transform: skewX(-20deg);
+    animation: shine 4.8s ease-in-out 1.6s infinite;
+  }
+  .download svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .download:hover { transform: translateY(-3px); filter: brightness(1.1); }
+  .download:hover svg { animation: bob 0.7s ease-in-out infinite alternate; }
+  .download:active { transform: translateY(0) scale(0.98); }
+  .download.small { padding: 10px 22px 10px 18px; border-radius: 999px; font-size: 15px; gap: 8px; animation: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 22px rgba(217, 70, 239, 0.5); }
+  .download.small svg { width: 18px; height: 18px; }
+  .download.small::after { animation-delay: 2.4s; }
+  @keyframes shine { 0%, 55% { left: -70%; } 100% { left: 140%; } }
+  @keyframes glow { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.65), inset 0 -12px 22px rgba(60,0,80,.22), 0 0 0 1px rgba(255,255,255,.16), 0 14px 40px rgba(217,70,239,.42); } 50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.65), inset 0 -12px 22px rgba(60,0,80,.22), 0 0 0 1px rgba(255,255,255,.16), 0 14px 64px rgba(217,70,239,.8); } }
+  @keyframes bob { from { transform: translateY(-2px); } to { transform: translateY(3px); } }
+  .file-note { margin: 18px 0 0; font-size: 14px; color: var(--faint); }
+
+  /* ---------- Bölümler ---------- */
+  .section { padding: 100px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+  h2 { margin: 0 0 14px; text-align: center; font-family: var(--display); font-weight: 700; font-size: clamp(32px, 4.6vw, 48px); line-height: 1.1; letter-spacing: -0.01em; }
+  .section-lead { margin: 0 auto 68px; max-width: 46ch; text-align: center; color: var(--muted); }
+
+  /* Kaydırınca açılan öğeler */
+  .js .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); transition-delay: var(--d, 0ms); }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  /* ---------- Adımlar ---------- */
+  .steps { --p: 1; position: relative; margin: 0; padding: 0; list-style: none; }
+  .js .steps { --p: 0; }
+  .steps::before, .steps::after { content: ""; position: absolute; top: 24px; left: 50%; width: 2px; margin-left: -1px; border-radius: 2px; }
+  .steps::before { bottom: 24px; background: rgba(255, 255, 255, 0.08); }
+  .steps::after { height: calc((100% - 48px) * var(--p)); background: linear-gradient(to bottom, #7c3aed, #f0abfc); box-shadow: 0 0 18px rgba(217, 70, 239, 0.8); }
+
+  .step { display: grid; grid-template-columns: 1fr 96px 1fr; align-items: center; padding: 30px 0; }
+  .step .visual { grid-column: 1; grid-row: 1; justify-self: end; }
+  .step .node   { grid-column: 2; grid-row: 1; justify-self: center; }
+  .step .text   { grid-column: 3; grid-row: 1; }
+  .step:nth-child(even) .visual { grid-column: 3; justify-self: start; }
+  .step:nth-child(even) .text   { grid-column: 1; text-align: right; justify-self: end; }
+
+  .node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f0abfc, #a21caf 70%);
+    box-shadow: 0 0 0 6px var(--bg), 0 0 36px rgba(217, 70, 239, 0.8);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .js .node { transform: scale(0.5); opacity: 0.3; filter: saturate(0.3); transition: transform 0.6s cubic-bezier(0.3, 1.6, 0.5, 1), opacity 0.5s ease, filter 0.5s ease; }
+  .js .node.lit { transform: scale(1); opacity: 1; filter: none; }
+
+  .visual { display: grid; place-items: center; width: min(100%, 260px); height: 144px; border-radius: 24px; box-shadow: var(--glass-shadow), 0 34px 80px -24px rgba(124, 58, 237, 0.7); }
+  .js .visual.reveal { transform: translateX(-46px) scale(0.96); }
+  .js .step:nth-child(even) .visual.reveal { transform: translateX(46px) scale(0.96); }
+  .js .visual.reveal.in { transform: none; }
+  .visual svg { position: relative; z-index: 1; width: 116px; height: 78px; fill: none; stroke: #e6d4ff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px rgba(201, 167, 255, 0.6)); }
+  .js .visual svg path, .js .visual svg rect { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .js .visual.in svg path, .js .visual.in svg rect { animation: draw 1.3s var(--ease) 0.3s forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .visual.in .arrow { animation: bob 1.1s ease-in-out 1.8s infinite alternate; }
+  .visual.in .play { transform-origin: 64px 50px; animation: pulse 1.8s ease-in-out 1.8s infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.18); } }
+
+  .text { max-width: 330px; }
+  .js .text.reveal { transform: translateX(34px); }
+  .js .step:nth-child(even) .text.reveal { transform: translateX(-34px); }
+  .js .text.reveal.in { transform: none; }
+  .text h3 { margin: 0 0 6px; font-family: var(--display); font-weight: 600; font-size: 22px; }
+  .text p { margin: 0; color: var(--muted); font-size: 16px; }
+
+  /* ---------- SSS ---------- */
+  .faq { display: grid; gap: 14px; max-width: 720px; margin: 0 auto; }
+  details { border-radius: 20px; interpolate-size: allow-keywords; }
+  summary { position: relative; z-index: 1; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 19px 24px; font-weight: 600; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; flex: none; font-family: var(--display); font-size: 26px; line-height: 1; color: var(--lavender); transition: transform 0.3s var(--ease); }
+  details[open] summary::after { transform: rotate(135deg); }
+  details::details-content { height: 0; overflow: clip; transition: height 0.4s var(--ease), content-visibility 0.4s allow-discrete; }
+  details[open]::details-content { height: auto; }
+  details p { position: relative; z-index: 1; margin: 0; padding: 0 24px 22px; color: var(--muted); font-size: 16px; }
+
+  /* ---------- Kapanış ---------- */
+  .panel { max-width: 760px; margin: 0 auto; padding: 68px 28px; border-radius: 32px; text-align: center; }
+  .panel h2 { position: relative; z-index: 1; margin-bottom: 14px; }
+  .panel p, .panel .download { position: relative; z-index: 1; }
+  .panel .lead { margin-bottom: 32px; }
+  .panel .download { margin-top: 0; }
+
+  footer { padding: 30px 0 44px; border-top: 1px solid rgba(255, 255, 255, 0.08); text-align: center; color: var(--faint); font-size: 14px; }
+
+  /* ---------- Hareketi azalt ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .js .reveal, .js .node, .js .visual.reveal, .js .text.reveal { opacity: 1; transform: none; filter: none; }
+    .js .visual svg path, .js .visual svg rect { stroke-dashoffset: 0; }
+    .js .steps { --p: 1; }
+    .nav { transform: translateX(-50%); }
+  }
+
+  /* ---------- Telefon ---------- */
+  @media (max-width: 760px) {
+    body { font-size: 16px; }
+    .nav { padding-left: 14px; }
+    .nav-links a:not(.download) { display: none; }
+    .logo-stage { width: 180px; height: 180px; margin-top: 96px; }
+    .hero-logo { width: 164px; }
+    .hero { padding-bottom: 84px; }
+    .section { padding: 76px 0; }
+    .section-lead { margin-bottom: 42px; }
+
+    .steps::before, .steps::after { left: 24px; }
+    .step { grid-template-columns: 48px 1fr; column-gap: 20px; padding: 20px 0; align-items: start; }
+    .step .visual { display: none; }
+    .step .node, .step:nth-child(even) .node { grid-column: 1; }
+    .step .text, .step:nth-child(even) .text { grid-column: 2; text-align: left; justify-self: start; max-width: none; padding-top: 4px; }
+    .js .text.reveal, .js .step:nth-child(even) .text.reveal { transform: translateY(24px); }
+    .js .text.reveal.in { transform: none; }
+    .panel { padding: 52px 20px; border-radius: 26px; }
+  }
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="liquid" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="2" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="bg" aria-hidden="true">
+    <span class="orb a"></span><span class="orb b"></span><span class="orb c"></span><span class="orb d"></span>
+  </div>
+
+  <nav class="nav glass" aria-label="Ana menü">
+    <a class="brand" href="#">
+      <img src="logo.png" alt="" width="34" height="34">
+      GetHigh
+    </a>
+    <div class="nav-links">
+      <a href="#kurulum">Nasıl kurulur</a>
+      <a href="#sss">Sık sorulanlar</a>
+      <a class="download small" href="https://github.com/faxxdev/gethigh/releases/latest/download/GetHigh.zip">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+        İndir
+      </a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="aurora" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <div class="logo-stage" aria-hidden="true">
+        <span class="ring"></span><span class="ring two"></span>
+        <img class="hero-logo" src="logo.png" alt="" width="512" height="512">
+      </div>
+      <h1 class="enter" style="--i:1"><span class="grad">GetHigh</span><br>Hemen indir</h1>
+      <p class="lead enter" style="--i:2">Tek bir ZIP dosyası indir. İçinde uygulamanın exe dosyası ve gerekli klasör var.</p>
+
+      <ul class="chips enter" style="--i:3">
+        <li class="glass">
+          <svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="11" fill="#c026d3"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Tek ZIP dosyası</span>
+        </li>
+        <li class="glass">
+          <svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="11" fill="#c026d3"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Exe ve gerekli klasör içinde</span>
+        </li>
+        <li class="glass">
+          <svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="11" fill="#c026d3"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Windows için</span>
+        </li>
+      </ul>
+
+      <div class="enter" style="--i:4">
+        <a class="download" href="https://github.com/faxxdev/gethigh/releases/latest/download/GetHigh.zip">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+          GetHigh'ı indir
+        </a>
+        <p class="file-note">Dosya adı: GetHigh.zip</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="kurulum" aria-labelledby="kurulum-baslik">
+      <div class="wrap">
+        <h2 id="kurulum-baslik" class="reveal">Üç adımda başla</h2>
+        <p class="section-lead reveal" style="--d:100ms">İndirdikten sonra kurulum programı yok, dosyayı ayıklayıp çalıştırman yeterli.</p>
+
+        <ol class="steps">
+          <li class="step">
+            <div class="visual glass reveal" aria-hidden="true">
+              <svg viewBox="0 0 120 80"><g class="arrow"><path pathLength="1" d="M60 8v38M44 31l16 16 16-16"/></g><path pathLength="1" d="M26 58v12h68V58"/></svg>
+            </div>
+            <div class="node">1</div>
+            <div class="text reveal" style="--d:150ms">
+              <h3>ZIP dosyasını indir</h3>
+              <p>Yukarıdaki butona tıkla. GetHigh.zip dosyası bilgisayarına iner.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="visual glass reveal" aria-hidden="true">
+              <svg viewBox="0 0 120 80"><path pathLength="1" d="M22 14h28l8 9h40v47H22z"/><path pathLength="1" d="M64 23v3M64 33v3M64 43v3M64 53v3"/></svg>
+            </div>
+            <div class="node">2</div>
+            <div class="text reveal" style="--d:150ms">
+              <h3>Dosyayı ayıkla</h3>
+              <p>ZIP dosyasına sağ tıkla ve "Tümünü ayıkla" seç. Dosyalar yeni bir klasörde açılır.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="visual glass reveal" aria-hidden="true">
+              <svg viewBox="0 0 120 80"><rect pathLength="1" x="18" y="10" width="84" height="58" rx="7"/><path pathLength="1" d="M18 26h84"/><path class="play" pathLength="1" d="M52 36l22 14-22 14z"/></svg>
+            </div>
+            <div class="node">3</div>
+            <div class="text reveal" style="--d:150ms">
+              <h3>Exe dosyasını çalıştır</h3>
+              <p>Açılan klasörde exe dosyasını bul ve çift tıklayarak çalıştır.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="sss" aria-labelledby="sss-baslik">
+      <div class="wrap">
+        <h2 id="sss-baslik" class="reveal">Sık sorulanlar</h2>
+        <p class="section-lead reveal" style="--d:100ms">Takılırsan önce buraya bak.</p>
+
+        <div class="faq">
+          <details class="glass reveal" style="--d:0ms">
+            <summary>Windows güvenlik uyarısı gösterdi, ne yapmalıyım?</summary>
+            <p>Windows, imzasız uygulamalarda bu uyarıyı gösterebilir. "Ek bilgi" bağlantısına tıkla, sonra "Yine de çalıştır" seç.</p>
+          </details>
+          <details class="glass reveal" style="--d:120ms">
+            <summary>Exe dosyasıyla klasörü ayrı yerlere taşıyabilir miyim?</summary>
+            <p>Taşıma. Exe dosyasını ve yanındaki klasörü aynı yerde bırak, uygulama bu klasördeki dosyaları kullanır.</p>
+          </details>
+          <details class="glass reveal" style="--d:240ms">
+            <summary>İndirme başlamıyor</summary>
+            <p>Sayfayı yenile ve indirme butonuna tekrar tıkla. Tarayıcı dosyayı engellediyse indirme çubuğundan dosyayı tutmayı seç.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="son-baslik">
+      <div class="wrap">
+        <div class="panel glass reveal">
+          <h2 id="son-baslik">Hazırsan indir</h2>
+          <p class="lead">Tek tıkla ZIP dosyası inmeye başlar.</p>
+          <a class="download" href="https://github.com/faxxdev/gethigh/releases/latest/download/GetHigh.zip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+            GetHigh'ı indir
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">GetHigh</div>
+  </footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Chromium'da camın arkasındaki görüntü sıvı gibi kırılsın
+  var ua = navigator.userAgent;
+  if (/Chrome\//.test(ua) && !/Firefox|FxiOS/.test(ua)) root.classList.add("liquid-svg");
+
+  // Kaydırınca açılan öğeler
+  var items = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { entry.target.classList.add("in"); io.unobserve(entry.target); }
+      });
+    }, { threshold: 0.2, rootMargin: "0px 0px -8% 0px" });
+    items.forEach(function (el) { io.observe(el); });
+  }
+
+  // İmleci izleyen cam ışığı
+  document.addEventListener("pointermove", function (e) {
+    var g = e.target.closest ? e.target.closest(".glass") : null;
+    if (!g) return;
+    var r = g.getBoundingClientRect();
+    g.style.setProperty("--mx", (e.clientX - r.left) + "px");
+    g.style.setProperty("--my", (e.clientY - r.top) + "px");
+  });
+
+  // Adım çizgisi kaydırdıkça dolar
+  var steps = document.querySelector(".steps");
+  var nodes = steps ? steps.querySelectorAll(".node") : [];
+  function update() {
+    if (!steps) return;
+    var r = steps.getBoundingClientRect();
+    var mark = window.innerHeight * 0.62;
+    var p = Math.max(0, Math.min(1, (mark - r.top) / r.height));
+    steps.style.setProperty("--p", p.toFixed(3));
+    nodes.forEach(function (n) {
+      var nr = n.getBoundingClientRect();
+      n.classList.toggle("lit", nr.top + nr.height / 2 < mark);
+    });
+  }
+  if (steps) {
+    if (reduce) { nodes.forEach(function (n) { n.classList.add("lit"); }); }
+    else {
+      var ticking = false;
+      var onScroll = function () {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () { update(); ticking = false; });
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      update();
+    }
+  }
+
+  // Logo imlece göre hafifçe eğilir
+  var stage = document.querySelector(".logo-stage");
+  if (stage && !reduce && window.matchMedia("(pointer: fine)").matches) {
+    window.addEventListener("pointermove", function (e) {
+      var x = e.clientX / window.innerWidth - 0.5;
+      var y = e.clientY / window.innerHeight - 0.5;
+      stage.style.setProperty("--rx", (-y * 10).toFixed(2) + "deg");
+      stage.style.setProperty("--ry", (x * 14).toFixed(2) + "deg");
+    });
+  }
+})();
+</script>
+</body>
+</html>
